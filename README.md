@@ -8,12 +8,12 @@ To install this in another agent, you can copy the `skills/` directory to whatev
 
 ### Build
 
-- [`astrodb-build-setup`](skills/astrodb-build-setup/SKILL.md) — Set up the local directory, cloning the astrodb template and naming it properly.
+- [`astrodb-build-setup`](skills/astrodb-build-setup/SKILL.md) — Set up the local directory, cloning the astrodb template, naming it properly, and adding graphviz to the environment config so the schema diagram can be redrawn later.
 - [`astrodb-build-parse-table`](skills/astrodb-build-parse-table/SKILL.md) — Summarize table columns, descriptions, units, and types.
 - [`astrodb-build-schema-match`](skills/astrodb-build-schema-match/SKILL.md) — Map parsed columns to [AstroDB Template](https://github.com/astrodbtoolkit/astrodb-template-db) tables and fields.
 - [`astrodb-build-schema-validate`](skills/astrodb-build-schema-validate/SKILL.md) — Identify problems with nulls and inconsistent data types.
 - [`astrodb-build-schema-generate`](skills/astrodb-build-schema-generate/SKILL.md) — Create a Felis-format schema.yaml file using outputs of previous skills.
-- [`astrodb-build-create-db`](skills/astrodb-build-create-db/SKILL.md) — Create an empty SQLite AstroDB database from a Felis-validated schema.yaml.
+- [`astrodb-build-create-db`](skills/astrodb-build-create-db/SKILL.md) — Create an empty SQLite AstroDB database from a Felis-validated schema.yaml, and redraw the schema ERD from it.
 
 ### Ingest
 
@@ -35,6 +35,15 @@ To install this in another agent, you can copy the `skills/` directory to whatev
   - `astrodbkit`
   - `astrodb_utils`
   - `pytest`
+
+Optional, for the schema entity relationship diagram:
+
+- `graphviz` — a system package providing the `dot` binary, so it cannot be installed with `uv`
+  (`brew install graphviz`, `sudo apt install graphviz graphviz-dev`, `winget install graphviz`, or
+  `conda install -c conda-forge graphviz pygraphviz`)
+- `eralchemy2` — the Python side, which renders through graphviz
+
+Without these, everything else still works; `astrodb-build-create-db` skips the diagram and says so.
 
 ## License
 

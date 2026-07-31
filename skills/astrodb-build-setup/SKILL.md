@@ -82,7 +82,7 @@ Now branch on **unpersonalized state**, not merely on structure being present:
   title. The user cloned it themselves (their own repo, or the template directly) and started Claude
   inside it. **Skip the create-and-clone work in Steps 1–3** — you already have the repo — but do **not**
   skip anything else. Run the Step 3 structure verification against the current directory (`<repo-dir>` is
-  `.`), then continue from **Step 4** through Step 9. You still need a database name: if the user gave one,
+  `.`), then continue from **Step 4** through Step 10. You still need a database name: if the user gave one,
   use it; if not, ask for it (Step 1's naming prompt) before setting `db_name` in Step 5.
 
 - **Don't run setup — already personalized.** If `db_name` is already something other than
@@ -119,7 +119,7 @@ to — cleaner than forking or copying files by hand.
 
 The same-name suggestion is a nice-to-have, not a gate: if the user already made their repo under a
 different name, or gives you both the database name and repo URL in one message, just take both and move
-on. Don't mention the mismatch upfront — wait until Step 8 (after setup is complete) to raise it.
+on. Don't mention the mismatch upfront — wait until Step 10 (after setup is complete) to raise it.
 
 Hold on to the database name for Step 4. Wait until you have a repo URL before continuing to Step 2; if
 the user hasn't made the repo yet, walk them through the three steps above and pause until they do.
@@ -139,7 +139,7 @@ git clone <user-repo-url>
 Do this without asking the user where to put it or what working directory to use — `git clone` creates a
 new folder named after the repo right where you already are, which is exactly what's wanted. There's
 nothing meaningful to ask about directories yet, since `<repo-dir>` doesn't exist until this command
-finishes; that conversation belongs in Step 8, once it does.
+finishes; that conversation belongs in Step 10, once it does.
 
 If `git` isn't available or the clone fails (e.g. no network, or a private repo you can't access), don't
 fake it or work around it — tell the user plainly, and if it's an access problem point them at making the
@@ -194,6 +194,11 @@ while looking like it worked — so confirm the file is actually gone rather tha
 ls <repo-dir>/docs/figures/schema_erd.png 2>/dev/null && echo "STILL PRESENT — check the path" || echo "removed"
 ```
 
+The ERD is meant to come back: the repo ships `scripts/make_schema_erd.py`, and
+`astrodb-build-create-db` runs it against the user's real schema at the end of the build. Drawing it
+needs graphviz, which **Step 8** makes sure the environment has. Deleting the diagram here and only
+discovering five skills later that nothing can redraw it is the failure that pairing prevents.
+
 ## Step 5: Set the database name in database.toml
 
 Update the cloned `database.toml` so `db_name` is the name from Step 1. It ships as
@@ -243,7 +248,9 @@ Update `README.md` in two places:
 
 Remove the text that refers to the astrodb-utils package. Also remove the entity relationship diagram
 (ERD) image link — it points to `docs/figures/schema_erd.png`, which Step 4 deleted, so the link would
-now be broken.
+now be broken. It isn't gone for good: `astrodb-build-create-db` offers to put the link back once it
+has redrawn the diagram from the user's own schema. Better a README with no image for the length of
+the build than one with a broken image.
 
 Keep the Acknowledgements section and the credit line at the bottom that acknowledges the AstroDB Toolkit and template.
 
@@ -328,7 +335,79 @@ Act on their answer with the `Edit` tool (not `sed`), leaving the rest of the fi
   filling in the current year and their name in its copyright line. Don't leave a placeholder year or
   name behind. If they're unsure which to pick, point them to https://choosealicense.com.
 
-If the user says "skip," "later," or "leave it," that's fine — move on to Step 7 without pressing.
+If the user says "skip," "later," or "leave it," that's fine — move on to Step 8 without pressing.
+
+## Step 8: Add graphviz to the environment, so the ERD can be regenerated
+
+Step 4 deleted `docs/figures/schema_erd.png` because it pictured the *template's* schema. The repo
+ships `scripts/make_schema_erd.py` to draw a fresh one from whatever is in `schema.yaml`, and
+`astrodb-build-create-db` runs it once the user's real schema exists. That script renders through
+`eralchemy2`, which shells out to graphviz's `dot` binary — a **system** package that no Python
+installer can provide. The template's environment config doesn't currently install either one, so
+without this step the diagram simply never comes back.
+
+There are two places to fix, and they are independent: the container config the repo ships with, and
+whatever environment the user is running in right now.
+
+### 8a: Update the repo's environment config
+
+If the cloned repo has `.devcontainer/devcontainer.json`, its `postCreateCommand` is the list of
+packages every fresh container gets. It ships without graphviz:
+
+```bash
+cat <repo-dir>/.devcontainer/devcontainer.json
+```
+
+Add the graphviz system package and `eralchemy2` to that command with the `Edit` tool, leaving the
+image and features untouched. The `apt-get` half must come first — `eralchemy2` pulls in `pygraphviz`,
+which compiles against graphviz's development headers:
+
+```json
+"postCreateCommand": "sudo apt-get update && sudo apt-get install -y graphviz graphviz-dev && pip install astrodbkit astrodb_utils pytest lsst-felis eralchemy2"
+```
+
+Match whatever packages are already in the user's `postCreateCommand` rather than pasting this line
+verbatim — the point is to append `eralchemy2` and prepend the `apt-get` install, not to replace a
+list that may have drifted from the template.
+
+If there is no `.devcontainer/` directory, skip this sub-step; there's no shipped environment config
+to amend.
+
+### 8b: Check the environment the user is actually in
+
+The devcontainer change only helps someone who rebuilds the container. Check whether `dot` is on PATH
+here and now:
+
+```bash
+dot -V   # prints e.g. "dot - graphviz version 12.2.1"; a non-zero exit means it isn't installed
+```
+
+**If `dot` is there**, say so in a few words and move on — nothing to install.
+
+**If `dot` is missing**, tell the user what it's for and hand them the command for their platform.
+Don't run the install yourself: these are system package managers that may need `sudo`, may prompt
+interactively, and may not be the one this user actually uses.
+
+| Platform | Command |
+|---|---|
+| macOS (Homebrew) | `brew install graphviz` |
+| Debian / Ubuntu | `sudo apt install graphviz graphviz-dev` |
+| Windows (winget) | `winget install graphviz` |
+| conda / mamba | `conda install -c conda-forge graphviz pygraphviz` |
+
+> Your repo has `scripts/make_schema_erd.py`, which draws the schema diagram, but graphviz's `dot`
+> binary isn't on your PATH. It's a system package, so no Python installer can pull it in —
+> `<command for their platform>` will. This is optional: the database and every other skill work fine
+> without it, you just won't get an ERD. Install it now, or skip the diagram?
+
+Note the template repo has **no `pyproject.toml`** — its own `CLAUDE.md` says so explicitly — so
+`uv add` and `uv sync` do not work inside it. The Python half is `uv pip install eralchemy2`, or
+nothing at all if you'd rather let `astrodb-build-create-db` pull it in per-run with
+`uv run --with eralchemy2`.
+
+**If the user declines**, that's fine — don't press, and don't remove the script or undo 8a. Note the
+decision in `workflow.md` at the Final Step so `astrodb-build-create-db` skips the diagram rather than
+asking a second time.
 
 ## Step 9: Artifacts directory and directions document
 
@@ -359,7 +438,7 @@ Do this even though you've already read it. The path the user typed is theirs, o
 and specific to this one conversation; downstream skills look in `astrodb-build-artifacts/directions.md`
 and have no way to guess where the original lives. Copying it in is what turns a one-off path into the
 project's own record — otherwise the user has to re-supply it to every skill, which is exactly the
-friction the document exists to remove. Then proceed to Step 9.
+friction the document exists to remove. Then proceed to Step 10.
 
 **Otherwise**, read `references/directions_example.md` and show the user what a directions document
 covers. Ask:
@@ -376,7 +455,7 @@ skill later. Don't copy the example in as a placeholder to fill later: downstrea
 presence of `directions.md` as a signal that real, user-authored guidance exists, so a file of unfilled
 headings is worse than no file at all — it sends them looking for direction the user never gave.
 
-## Step 11: Confirm, and point to what's next
+## Step 10: Confirm, and point to what's next
 
 Tell the user the scaffold is ready: where the repo was cloned, that the structure checks out, and that
 `db_name` is set (along with any README and LICENSE edits they made). This is also the natural point to
@@ -412,8 +491,9 @@ Only raise this if there is an actual mismatch. If the names already match, skip
 
 Follow the convention in `references/astrodb-directions.md`. Create `workflow.md` in the
 repo root (using the standard header) and append a setup entry recording: the database name
-chosen, the GitHub repo URL, the README description provided, and whether a directions
-document was completed now or deferred. Subsequent skills will append to this file.
+chosen, the GitHub repo URL, the README description provided, whether graphviz was already present,
+installed, or declined, and whether a directions document was completed now or deferred. Subsequent
+skills will append to this file.
 
 ## Completion Checklist
 
@@ -431,6 +511,7 @@ of the document. What doesn't count is neither asking nor finding it written dow
 - [ ] **README** — the title + description reflect this database, from the directions document or from the user's answer (or they explicitly skipped). Removed: the astrodb-utils line and the template ERD image link. Still intact: the bottom credit line acknowledging the AstroDB Toolkit/template.
 - [ ] **CLAUDE.md** — if the repo has one, its project description reflects the user's database, the Git/GitHub instructions are gone, and no `astrodb-template` references remain (or the user explicitly skipped). If the repo has no `CLAUDE.md`, this is a no-op.
 - [ ] **LICENSE** — the copyright/license reflects what the directions document or the user specified: new name(s) on the BSD 3-Clause copyright, or a different license with the year and name filled in (no placeholder left behind) — or they explicitly declined. You never put a name on it that neither the user nor the directions document gave.
+- [ ] **graphviz** — if the repo has a `.devcontainer/devcontainer.json`, its `postCreateCommand` now installs graphviz and `eralchemy2` (no `.devcontainer/` makes this a no-op); and you actually ran `dot -V` in the current environment, then either confirmed it is present or gave the user the install command for their platform and honored their answer. A decline is a valid outcome — record it in `workflow.md` rather than installing on their behalf.
 - [ ] **Artifacts** — `astrodb-build-artifacts/` exists. If the user supplied a directions document by path, it has been copied to `astrodb-build-artifacts/directions.md`. It contains `directions.md` only if the user actually wrote one or supplied a path; you did not leave an unfilled template behind.
 - [ ] You told the user the cloned directory is their project directory from here on, and named the next step (parse a data table).
 - [ ] If — and only if — the repo name and `db_name` differ, you raised the mismatch at the end and offered the `git remote set-url` fix.

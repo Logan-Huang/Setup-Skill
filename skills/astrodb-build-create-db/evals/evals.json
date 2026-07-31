@@ -22,6 +22,10 @@
         {
           "text": "Runs pytest and reports that all tests pass",
           "type": "output_contains"
+        },
+        {
+          "text": "Does not claim an ERD was generated — /tmp/bdsurvey-project/ has no scripts/make_schema_erd.py, so the ERD step is skipped and the report says so rather than listing a docs/figures/schema_erd.png that does not exist",
+          "type": "output_contains"
         }
       ]
     },
@@ -61,6 +65,38 @@
         },
         {
           "text": "Creates a tests/ directory and runs pytest",
+          "type": "output_contains"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "My schema is validated and I'm in my astrodb repo (cloned from the template, so it has scripts/make_schema_erd.py). Build the database from astrodb-build-artifacts/StreamDB-schema.yaml here.",
+      "expected_output": "The skill validates the schema, builds StreamDB.sqlite and the tests/ directory in the current directory, and then regenerates the entity relationship diagram that astrodb-build-setup deleted: it runs scripts/make_schema_erd.py from the project root, naming eralchemy2, lsst-felis and pyyaml on the uv run command since the template repo has no pyproject.toml to resolve against. It checks that graphviz's dot binary is present first, and confirms docs/figures/schema_erd.png actually exists afterwards rather than trusting the exit code. If dot is missing, or workflow.md records that the user declined graphviz at setup, the ERD is skipped with a stated reason and the build still succeeds — a missing diagram is not a build failure, and the skill does not install a system package on the user's behalf.",
+      "files": ["astrodb-build-artifacts/StreamDB-schema.yaml"],
+      "assertions": [
+        {
+          "text": "Runs scripts/make_schema_erd.py from the project root after the database and tests are built",
+          "type": "output_contains"
+        },
+        {
+          "text": "Verifies docs/figures/schema_erd.png exists after the script runs, rather than reporting success from the exit code alone",
+          "type": "file_exists"
+        },
+        {
+          "text": "Checks for graphviz's dot binary before running the script, and if it is missing skips the ERD with a stated reason instead of installing a system package or failing the build",
+          "type": "output_contains"
+        },
+        {
+          "text": "Reads workflow.md and skips the ERD without re-asking if setup recorded that the user declined graphviz",
+          "type": "output_contains"
+        },
+        {
+          "text": "Offers to restore the ERD image link in README.md that astrodb-build-setup removed, and only after confirming the regenerated file exists — never adding a link to a diagram that was not generated",
+          "type": "output_contains"
+        },
+        {
+          "text": "Reports the ERD path in the final report alongside the database, schema, config, data directories and tests — or states why it was skipped",
           "type": "output_contains"
         }
       ]

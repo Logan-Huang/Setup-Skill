@@ -28,7 +28,7 @@
     {
       "id": 2,
       "prompt": "I made my repo from the template, it's at https://github.com/kelle/test-astrodb . Call the database BdSurvey and get it set up.",
-      "expected_output": "Clones https://github.com/kelle/test-astrodb right away without asking where to put it, verifies structure, removes the generated schema representations (the ERD at docs/figures/schema_erd.png and the docs/schema/*.md files), updates db_name to 'BdSurvey', asks for a README description, and applies that description to both README.md and CLAUDE.md \u2014 also stripping CLAUDE.md's '## Git and GitHub' section and renaming astrodb-template references without breaking upstream template links. Prompts the user to update the LICENSE \u2014 putting their own name(s) on the copyright or choosing a different license, since none was given. In Step 8, creates the astrodb-build-artifacts/ directory and offers to help write a directions document, but does not write a directions.md file since the user never asked for one \u2014 no placeholder or template copy is left behind. Tells the user the cloned directory is their project directory. At the end \u2014 after setup is complete \u2014 notes the repo/database name mismatch (test-astrodb vs BdSurvey), asks if they want to rename the repo on GitHub, and offers to run 'git remote set-url origin' with the new URL once they do. Optionally offers to rename the local directory too. Does not raise the mismatch before or during cloning.",
+      "expected_output": "Clones https://github.com/kelle/test-astrodb right away without asking where to put it, verifies structure, removes the generated schema representations (the ERD at docs/figures/schema_erd.png and the docs/schema/*.md files), updates db_name to 'BdSurvey', asks for a README description, and applies that description to both README.md and CLAUDE.md \u2014 also stripping CLAUDE.md's '## Git and GitHub' section and renaming astrodb-template references without breaking upstream template links. Prompts the user to update the LICENSE \u2014 putting their own name(s) on the copyright or choosing a different license, since none was given. Adds graphviz to the environment so the deleted ERD can be redrawn later: amends .devcontainer/devcontainer.json's postCreateCommand to install graphviz plus eralchemy2, and checks whether the dot binary is on PATH in the current environment, handing the user the install command for their platform rather than running a system package manager itself. In Step 9, creates the astrodb-build-artifacts/ directory and offers to help write a directions document, but does not write a directions.md file since the user never asked for one \u2014 no placeholder or template copy is left behind. Tells the user the cloned directory is their project directory. At the end \u2014 after setup is complete \u2014 notes the repo/database name mismatch (test-astrodb vs BdSurvey), asks if they want to rename the repo on GitHub, and offers to run 'git remote set-url origin' with the new URL once they do. Optionally offers to rename the local directory too. Does not raise the mismatch before or during cloning.",
       "files": [],
       "assertions": [
         {
@@ -54,6 +54,18 @@
         {
           "id": "eval2_updates_db_name",
           "text": "Updates database.toml so db_name is set to the user-provided name (BdSurvey)"
+        },
+        {
+          "id": "eval2_devcontainer_adds_graphviz",
+          "text": "Amends .devcontainer/devcontainer.json so its postCreateCommand installs the graphviz system package and eralchemy2 alongside the packages already listed — appending to the existing command rather than replacing the image, the features, or the other packages"
+        },
+        {
+          "id": "eval2_checks_dot_on_path",
+          "text": "Checks whether graphviz's dot binary is available in the current environment (e.g. runs 'dot -V'), rather than assuming it based only on having edited the devcontainer config"
+        },
+        {
+          "id": "eval2_graphviz_install_left_to_user",
+          "text": "If dot is missing, gives the user the install command for their platform (brew/apt/winget/conda) and lets them run it — does not invoke a system package manager itself, and does not claim graphviz is installed when it is not"
         },
         {
           "id": "eval2_creates_artifacts_dir",
@@ -434,6 +446,34 @@
         {
           "id": "eval12_persists_directions_doc",
           "text": "Copies the user-supplied directions document to astrodb-build-artifacts/directions.md"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "Set up an astrodb called FlareCat from https://github.com/kelle/test-astrodb . I don't want to install graphviz — I have no use for the diagram.",
+      "expected_output": "Runs the normal setup, but honors the refusal on graphviz: does not install it, does not ask a second time, and does not pretend the ERD will exist. Setup still completes — the diagram is optional and its absence is not a failure. The decision is written into workflow.md so astrodb-build-create-db skips the ERD step later instead of re-opening the question. Amending .devcontainer/devcontainer.json is a judgment call the skill should not force: it may leave the config alone given the explicit refusal, but it must not describe the graphviz step as done if it skipped it. scripts/make_schema_erd.py is left in the repo either way — the user declined to install a tool, not to keep a file.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "eval13_honors_decline",
+          "text": "Does not install graphviz or eralchemy2, and does not re-ask the user to reconsider after they declined"
+        },
+        {
+          "id": "eval13_records_decision",
+          "text": "Records the declined-graphviz decision in workflow.md, so astrodb-build-create-db can skip the ERD rather than asking again"
+        },
+        {
+          "id": "eval13_setup_still_completes",
+          "text": "Completes the rest of setup normally (db_name set to FlareCat, README/LICENSE personalization prompted) — the declined diagram does not block or abort setup"
+        },
+        {
+          "id": "eval13_keeps_erd_script",
+          "text": "Leaves scripts/make_schema_erd.py in the repo — the user declined to install a tool, not to delete the script"
+        },
+        {
+          "id": "eval13_no_false_erd_claim",
+          "text": "Does not claim the ERD was or will be generated, and does not tick the graphviz checklist item as satisfied when it was skipped"
         }
       ]
     }

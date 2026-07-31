@@ -83,12 +83,12 @@ Skills are designed to chain in order:
 
 #### Build
 
-1. **`astrodb-build-setup`** — Clone a user's repo from the astrodb-template-db GitHub template; set `db_name` in `database.toml`; personalize the README and LICENSE (new authors, or a different license). No data involved.
+1. **`astrodb-build-setup`** — Clone a user's repo from the astrodb-template-db GitHub template; set `db_name` in `database.toml`; personalize the README and LICENSE (new authors, or a different license); add graphviz + `eralchemy2` to `.devcontainer/devcontainer.json` and check for the `dot` binary locally, so the ERD it deletes can be redrawn by create-db. No data involved.
 2. **`astrodb-build-parse-table`** — Read FITS/CSV/ECSV/CDS-MRT/etc. with astropy or pandas; extract column names, descriptions, units, types. Writes output to `astrodb-build-artifacts/` for downstream skills.
 3. **`astrodb-build-schema-match`** — Map parsed columns to AstroDB template schema tables/fields. Reads `references/schema.md`, `references/column-patterns.md`, `references/photometry-filters.md`.
 4. **`astrodb-build-schema-validate`** — Check for nullable violations and type mismatches between data and schema.yaml.
 5. **`astrodb-build-schema-generate`** — Produce a Felis YAML `schema.yaml` from the mapping. Runs `felis validate` at the end.
-6. **`astrodb-build-create-db`** — Create an empty SQLite database from the validated schema using `astrodbkit`. Runs `scripts/create_db.py` and `scripts/generate_tests.py`.
+6. **`astrodb-build-create-db`** — Create an empty SQLite database from the validated schema using `astrodbkit`. Runs `scripts/create_db.py` and `scripts/generate_tests.py`, then the template repo's own `scripts/make_schema_erd.py` to regenerate `docs/figures/schema_erd.png`. The ERD is the one optional step here — it is skipped with a stated reason when graphviz is absent or the user declined it at setup.
 
 #### Ingest
 
@@ -129,3 +129,5 @@ Each `evals/evals.json` has `skill_name` and an array of `evals`, each with:
 - `astrodbkit` — Python ORM for AstroDB SQLite databases
 - `astrodb_utils` — ingestion helpers (`ingest_publication`, `ingest_source`, `find_publication`, `build_db_from_json`)
 - `lsst-felis` — Felis schema validation (`felis validate`)
+- `graphviz` — **system** package supplying the `dot` binary, needed to draw the schema ERD. Not installable with `uv`/`pip`, so skills detect it and hand the user the platform command rather than installing it. Note the template repo has no `pyproject.toml` (its own `CLAUDE.md` says so), which is why the ERD command uses `uv run --with …` instead of `uv add`.
+- `eralchemy2` — the Python half of the ERD, used by the template's `scripts/make_schema_erd.py`; pulls in `pygraphviz`, which compiles against graphviz's dev headers

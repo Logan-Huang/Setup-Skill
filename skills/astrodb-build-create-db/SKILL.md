@@ -87,6 +87,9 @@ The final layout will follow astrodb-template-db:
 ├── data/
 │   ├── reference/           ← lookup table JSON files (initially empty)
 │   └── source/              ← source JSON files (initially empty)
+├── docs/
+│   └── figures/
+│       └── schema_erd.png   ← ERD redrawn from this schema (Step 9)
 └── tests/                   ← generated test suite (Step 8)
     ├── conftest.py
     ├── test_felis.py
@@ -187,13 +190,82 @@ uv run pytest tests/ -v
   `generate_tests.py` didn't account for; re-run the script (it re-reads the schema)
 - Import errors for `astrodb_utils` or `felis` → run `uv add astrodb_utils felis` first
 
-## Step 9: Final report
+## Step 9: Regenerate the schema ERD
+
+`astrodb-build-setup` deleted the template's `docs/figures/schema_erd.png` because it pictured the
+*template's* schema. Now that the project root holds the user's own validated `schema.yaml` and the
+database builds cleanly, redraw it. This is the right moment: the schema is final, so the diagram
+won't be stale the day it's made.
+
+The repo ships the script. It reads `schema.yaml` from the current directory and writes
+`docs/figures/schema_erd.png`, so it has to be run from the project root:
+
+```bash
+ls <project-root>/scripts/make_schema_erd.py   # if it isn't there, skip this step and say so
+```
+
+Check `workflow.md` before asking anything. If setup recorded that the user declined graphviz, skip
+the diagram and mention it once in the final report — don't re-open a question they already answered.
+Otherwise confirm `dot` is available:
+
+```bash
+dot -V
+```
+
+**If `dot` is missing**, don't install it yourself. Say the ERD is being skipped and point at the
+platform table in `astrodb-build-setup` Step 8, then carry on — a missing diagram is not a failed
+build, and this is the one step in this skill that is allowed to be skipped.
+
+**If `dot` is there**, run the script from the project root:
+
+```bash
+cd <project-root>
+mkdir -p docs/figures
+uv run --with eralchemy2 --with lsst-felis --with pyyaml python scripts/make_schema_erd.py
+```
+
+The `--with` flags are doing real work here. The template repo has no `pyproject.toml`, so `uv run`
+alone resolves against whatever ambient environment exists and may be missing `eralchemy2`, `felis`,
+or `yaml` depending on what was installed during setup. Naming all three makes the command work the
+same way on a bare clone and a fully set-up project.
+
+Confirm the file was written rather than trusting the exit code:
+
+```bash
+ls -lh <project-root>/docs/figures/schema_erd.png
+```
+
+Then offer to put the README link back. `astrodb-build-setup` stripped the template's ERD image link
+when it deleted the file, so a freshly drawn diagram currently sits in the repo with nothing pointing
+at it:
+
+> The ERD is redrawn at `docs/figures/schema_erd.png`, from your schema. Want me to add it back to
+> the README? It was removed during setup because the old one had been deleted.
+
+If they say yes, add it with the `Edit` tool below the description line:
+
+```markdown
+![Entity Relationship Diagram](docs/figures/schema_erd.png)
+```
+
+Only offer this when the file actually exists — never add a link to a diagram that wasn't generated.
+
+If the script fails, the traceback usually says which half of graphviz is missing:
+- `ImportError` for `pygraphviz`, or a compiler error during install → graphviz is there but its
+  development headers aren't (`graphviz-dev` on Debian/Ubuntu)
+- `ExecutableNotFound: dot` → graphviz is installed but not on PATH for this shell
+- `felis.datamodel` errors → the `schema.yaml` at the project root is not the file Step 2 validated
+
+Report the failure and continue to the final report. Do not stop the build over the diagram.
+
+## Step 10: Final report
 
 Tell the user:
 - The database file path
 - The schema.yaml location
 - The database.toml location
 - The data/ directory structure
+- The ERD path, or why it was skipped
 - The tests/ directory and how to run them
 - What to do next (e.g., add JSON data files and re-run the tests to update counts)
 
@@ -203,6 +275,7 @@ Database created: MyDataset.sqlite (32 KB)
 Schema:           schema.yaml
 Config:           database.toml
 Data directory:   data/reference/  data/source/
+ERD:              docs/figures/schema_erd.png
 Tests:            tests/  (run with: uv run pytest tests/ -v)
 
 Next steps:
@@ -222,4 +295,6 @@ do not proceed past a failure.
 - [ ] `data/reference/` and `data/source/` exist under the project root you confirmed with the user, the validated schema.yaml is at that root, and `database.toml` exists (created only if absent — an existing one was not overwritten).
 - [ ] The empty SQLite database was created with `scripts/create_db.py`, and you verified the `.sqlite` file exists and is non-empty.
 - [ ] The test suite was generated with `scripts/generate_tests.py`, and `uv run pytest tests/ -v` was actually run and all tests pass.
-- [ ] You gave the final report: database path, schema location, config location, data directories, the tests directory with how to run them, and next steps.
+- [ ] **ERD** — `scripts/make_schema_erd.py` was run from the project root and you confirmed `docs/figures/schema_erd.png` now exists; or it was skipped for a stated reason (no such script, `dot` not installed, the user declined graphviz at setup, or the script errored). This item is the one waivable gate in this skill — but "skipped" must name which of those it was, not stand in for never having looked.
+- [ ] **README link** — if and only if the ERD was generated, you offered to restore the `![Entity Relationship Diagram](docs/figures/schema_erd.png)` link that setup removed, and honored the user's answer. No diagram means no offer and no link.
+- [ ] You gave the final report: database path, schema location, config location, data directories, the ERD path or why it was skipped, the tests directory with how to run them, and next steps.
