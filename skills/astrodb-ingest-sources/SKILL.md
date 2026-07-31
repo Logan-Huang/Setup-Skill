@@ -14,8 +14,8 @@ parameter meanings, and common warnings with fixes.
 
 ## Step 0: Read context documents
 
-1. Read `references/astrodb-directions.md` — it defines the `workflow.md`, artifact-folder, and
-   completion-checklist conventions this skill follows.
+1. Read `references/astrodb-directions.md` — it defines the `workflow.md`, artifact-folder,
+   `gotchas.md` problem-log, and completion-checklist conventions this skill follows.
 2. Check whether `workflow.md` exists in the current working directory. If it does, read it
    to carry forward context from prior skills.
 3. Record this skill's checklist per the completion-checklist convention — create the artifact
@@ -248,3 +248,4 @@ the evidence-annotated list here, per the **completion-checklist convention** in
 - [ ] The tailored script at `astrodb-ingest-artifacts/ingest_{REF}_sources.py` uses the user's real column names and paths, includes only optional columns that are actually present, uses the correct DB column names, and sets `SAVE_DB = False`.
 - [ ] A dry run was executed, and you reported how many sources were ingested / skipped (with warnings) and that the database was not saved.
 - [ ] `SAVE_DB = True` was set **only** after the user explicitly confirmed — never automatically.
+- [ ] Any significant problem hit during this run was logged in `gotchas.md` — classified `gotcha` or `one-off`, with a concrete suggested change — and any gotchas were named to the user as worth reporting to the astrodb-bot repo; or there were none worth logging.

@@ -10,8 +10,8 @@ This skill sets up a FastAPI web interface ([astrodb-web](https://github.com/ast
 
 ## Step 0: Read context documents
 
-1. Read `references/astrodb-directions.md` — it defines the `workflow.md`, artifact-folder, and
-   completion-checklist conventions this skill follows.
+1. Read `references/astrodb-directions.md` — it defines the `workflow.md`, artifact-folder,
+   `gotchas.md` problem-log, and completion-checklist conventions this skill follows.
 2. Check whether `workflow.md` exists in the current working directory. If it does, read it
    to carry forward context from prior skills.
 3. Record this skill's checklist per the completion-checklist convention — create the artifact
@@ -139,3 +139,4 @@ the evidence-annotated list here, per the **completion-checklist convention** in
 - [ ] `uv sync` was run and the server was started.
 - [ ] You verified the server actually serves data (e.g. `curl -s http://localhost:8000/browse` returns table content), recovering from any table-name-case or relative-path issues.
 - [ ] You told the user the site is running at http://localhost:8000, how to stop it, and the next steps (restart on DB changes; set up permanent hosting for production).
+- [ ] Any significant problem hit during this run was logged in `gotchas.md` — classified `gotcha` or `one-off`, with a concrete suggested change — and any gotchas were named to the user as worth reporting to the astrodb-bot repo; or there were none worth logging.

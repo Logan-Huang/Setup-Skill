@@ -14,8 +14,8 @@ by the user's data.
 
 ## Step 0: Read context documents
 
-1. Read `references/astrodb-directions.md` — it defines the `workflow.md`, artifact-folder, and
-   completion-checklist conventions this skill follows.
+1. Read `references/astrodb-directions.md` — it defines the `workflow.md`, artifact-folder,
+   `gotchas.md` problem-log, and completion-checklist conventions this skill follows.
 2. Check whether `workflow.md` exists in the current working directory. If it does, read it
    to carry forward context and decisions from prior skills (especially schema-match choices).
 3. Check whether `astrodb-build-artifacts/directions.md` exists. If it does, read it — it may specify
@@ -192,3 +192,4 @@ reproduce the evidence-annotated list here, per the **completion-checklist conve
 - [ ] The schema was written to a real file at `astrodb-build-artifacts/<schema-name>-schema.yaml` — you gave the user the path rather than reproducing the full YAML in the chat.
 - [ ] `felis validate` was actually run on the file and **passes** — if it failed, you fixed the errors, rewrote the file, and re-ran until it passed.
 - [ ] You reported the file path, the table/column counts, any skipped or flagged columns, and any assumptions made (inferred primary keys, default string lengths).
+- [ ] Any significant problem hit during this run was logged in `gotchas.md` — classified `gotcha` or `one-off`, with a concrete suggested change — and any gotchas were named to the user as worth reporting to the astrodb-bot repo; or there were none worth logging.

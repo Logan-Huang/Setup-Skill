@@ -13,8 +13,8 @@ contains against what the schema requires.
 
 ## Step 0: Read context documents
 
-1. Read `references/astrodb-directions.md` — it defines the `workflow.md`, artifact-folder, and
-   completion-checklist conventions this skill follows.
+1. Read `references/astrodb-directions.md` — it defines the `workflow.md`, artifact-folder,
+   `gotchas.md` problem-log, and completion-checklist conventions this skill follows.
 2. Check whether `workflow.md` exists in the current working directory. If it does, read it
    to carry forward context from prior skills.
 3. Check whether `astrodb-build-artifacts/directions.md` exists. If it does, read it — it may describe
@@ -136,3 +136,4 @@ the evidence-annotated list here, per the **completion-checklist convention** in
 - [ ] You checked both classes of problem: nullable violations and type mismatches (using broad compatibility, not strict equality).
 - [ ] Edge cases were handled (column not in data, field not in schema, all-null columns) rather than crashing or skipping silently.
 - [ ] You wrote the validation report to `astrodb-build-artifacts/schema-validation-report.md` (structured per `references/validation-report.md`) and told the user the path.
+- [ ] Any significant problem hit during this run was logged in `gotchas.md` — classified `gotcha` or `one-off`, with a concrete suggested change — and any gotchas were named to the user as worth reporting to the astrodb-bot repo; or there were none worth logging.
