@@ -12,8 +12,7 @@ using `astrodbkit`.
 
 ## Step 0: Read context documents
 
-1. Read `references/astrodb-directions.md` — it defines the `workflow.md`, artifact-folder,
-   `gotchas.md` problem-log, and completion-checklist conventions this skill follows.
+1. Read `references/astrodb-directions.md` — it defines the workflow that you should use.
 2. Check whether `workflow.md` exists in the current working directory. If it does, read it
    to carry forward context from prior skills.
 3. Record this skill's checklist per the completion-checklist convention — create the artifact
@@ -223,4 +222,4 @@ do not proceed past a failure.
 - [ ] The empty SQLite database was created with `scripts/create_db.py`, and you verified the `.sqlite` file exists and is non-empty.
 - [ ] The test suite was generated with `scripts/generate_tests.py`, and `uv run pytest tests/ -v` was actually run and all tests pass.
 - [ ] You gave the final report: database path, schema location, config location, data directories, the tests directory with how to run them, and next steps.
-- [ ] Any significant problem hit during this run was logged in `gotchas.md` — classified `gotcha` or `one-off`, with a concrete suggested change — and any gotchas were named to the user as worth reporting to the astrodb-bot repo; or there were none worth logging.
+- [ ] Any problem with the skills themselves was logged in `gotchas.md`, following the problem-log convention in `references/astrodb-directions.md` — or there was none worth logging.

@@ -4,7 +4,7 @@ This document collects the conventions that **every** skill in the AstroDB pipel
 live in one place instead of being repeated in each `SKILL.md`. It covers the `workflow.md` decision
 log, the artifact-folder convention, the `gotchas.md` problem log, and the completion-checklist
 convention. Each skill's `references/astrodb-directions.md` is a symlink to this file, so a skill reads
-all four by reading it.
+them all by reading it.
 
 ## Purpose: the `workflow.md` decision log
 
@@ -107,7 +107,8 @@ exist yet; otherwise append. Never rewrite or delete an existing entry.
 # AstroDB Gotchas
 
 Problems hit while running the AstroDB skills, and suggested fixes to the skills themselves.
-Entries marked **gotcha** are worth reporting at https://github.com/astrodbtoolkit/astrodb-bot.
+Entries marked **gotcha** are worth reporting at
+https://github.com/astrodbtoolkit/astrodb-bot/issues/new.
 Each skill appends its own entries; do not edit existing ones.
 ```
 

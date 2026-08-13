@@ -14,8 +14,7 @@ Parse the data table file `$ARGUMENTS` and extract column information.
 
 ### Step 0: Read context documents and set up
 
-1. Read `references/astrodb-directions.md` — it defines the `workflow.md`, artifact-folder,
-   `gotchas.md` problem-log, and completion-checklist conventions this skill follows.
+1. Read `references/astrodb-directions.md` — it defines the workflow that you should use.
 2. Check whether `workflow.md` exists in the current working directory. If it does, read it to carry
    forward context from prior skills.
 3. Create the artifact folder:
@@ -271,4 +270,4 @@ the evidence-annotated list here, per the **completion-checklist convention** in
 - [ ] Output went to a fresh `astrodb-build-artifacts/<base>-parsed-data-table/` directory (an existing one was not overwritten), and both the `.md` and `.html` files were written, each beginning with the metadata block.
 - [ ] The file was successfully read (astropy first, pandas fallback) in a verified Python 3.11+ environment, and the sidecar `astrodb-build-artifacts/astrodb-parse-result.json` records the reader, format, and row count — then was updated with the output file paths.
 - [ ] You showed links to both files in the chat (the table was not dumped inline) and invited the user to review or edit.
-- [ ] Any significant problem hit during this run was logged in `gotchas.md` — classified `gotcha` or `one-off`, with a concrete suggested change — and any gotchas were named to the user as worth reporting to the astrodb-bot repo; or there were none worth logging.
+- [ ] Any problem with the skills themselves was logged in `gotchas.md`, following the problem-log convention in `references/astrodb-directions.md` — or there was none worth logging.
