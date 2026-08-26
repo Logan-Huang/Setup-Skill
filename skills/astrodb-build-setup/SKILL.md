@@ -330,7 +330,7 @@ Act on their answer with the `Edit` tool (not `sed`), leaving the rest of the fi
 
 If the user says "skip," "later," or "leave it," that's fine — move on to Step 7 without pressing.
 
-## Step 9: Artifacts directory and directions document
+## Step 8: Artifacts directory and directions document
 
 Create the artifacts directory now, so everything downstream has a home to write to:
 
@@ -376,7 +376,7 @@ skill later. Don't copy the example in as a placeholder to fill later: downstrea
 presence of `directions.md` as a signal that real, user-authored guidance exists, so a file of unfilled
 headings is worse than no file at all — it sends them looking for direction the user never gave.
 
-## Step 11: Confirm, and point to what's next
+## Step 9: Confirm, and point to what's next
 
 Tell the user the scaffold is ready: where the repo was cloned, that the structure checks out, and that
 `db_name` is set (along with any README and LICENSE edits they made). This is also the natural point to

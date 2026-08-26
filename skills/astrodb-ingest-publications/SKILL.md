@@ -14,16 +14,6 @@ references for sources, photometry, spectra, parallaxes, etc.) must exist as a r
 Read `references/ingest_publication_api.md` before starting — it has the full function
 signatures, ADS token setup, the reference naming convention, and common warnings.
 
-## Step 0: Read context documents
-
-1. Read `references/astrodb-directions.md` — it defines the `workflow.md`, artifact-folder, and
-   completion-checklist conventions this skill follows.
-2. Check whether `workflow.md` exists in the current working directory. If it does, read it
-   to carry forward context from prior skills.
-3. Record this skill's checklist per the completion-checklist convention — create the artifact
-   directory if needed, then add a `## astrodb-ingest-publications` section holding the items from
-   `## Completion Checklist` (bottom of this file) to `astrodb-ingest-artifacts/checklists.md`.
-
 ## Reference naming convention
 
 Every entry in `Publications` has a `reference` shortname. Always construct it as:

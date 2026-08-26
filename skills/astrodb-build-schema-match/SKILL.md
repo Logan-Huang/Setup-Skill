@@ -12,46 +12,20 @@ metadata:
 Map columns from an astronomical data table to the AstroDB template database schema, so you know
 exactly which table and field each column belongs to before ingesting data.
 
-## Context Documents
+## Directions Document
 
-Before matching:
+Before matching, check whether `artifacts/directions.md` exists in the current working directory.
+If it does, read it now — it contains dataset-specific decisions (which columns go where, what to
+ignore, custom tables, known edge cases) that should directly inform how you map columns. Honor any
+explicit direction over the default matching heuristics.
 
-1. Read `references/astrodb-directions.md` — it covers the workflow.md, artifact-folder, and
-   completion-checklist conventions this skill follows.
-2. Check whether `workflow.md` exists in the current working directory. If it does, read it
-   to carry forward context and decisions from prior skills.
-3. Check whether `astrodb-build-artifacts/directions.md` exists. If it does, read it — it contains
-   dataset-specific decisions (which columns go where, what to ignore, custom tables, known
-   edge cases) that should directly inform how you map columns. Honor any explicit direction
-   over the default matching heuristics.
-
-Create the artifact folder before writing any files:
+**All outputs from this skill must be written inside a folder named `astrodb-build-artifacts/` in the current working directory.** Create this folder before writing any files:
 
 ```bash
 mkdir -p astrodb-build-artifacts
 ```
 
 If this fails, stop and tell the user you cannot create the output directory.
-
-Then record this skill's checklist per the completion-checklist convention: add a
-`## astrodb-build-schema-match` section holding the items from `## Completion Checklist` (bottom of
-this file) to `astrodb-build-artifacts/checklists.md`.
-
-## Directions Document
-
-Before matching, look for a **directions document** — the user's notes on which columns go where, what
-to ignore, custom tables, and known edge cases. Work through these in order and stop at the first hit:
-
-1. **The user provided a path.** Read it, then copy it to `astrodb-build-artifacts/directions.md` so it
-   persists for later skills and later runs.
-2. **`astrodb-build-artifacts/directions.md` already exists** — from a prior run, or copied there by
-   `astrodb-build-parse-table`. Read it as-is.
-3. **Neither.** Proceed without one; it's optional.
-
-Where a directions document speaks to a column, honor it over the default matching heuristics in this
-skill. Column matching is guesswork built on naming conventions, and the user writes these notes exactly
-where those conventions mislead — a `J` column that's a magnitude in one survey and a coordinate in
-another. Their explicit call beats the heuristic every time.
 
 ## Input
 
@@ -96,6 +70,32 @@ Read the **guiding principle at the top of `references/column-patterns.md` first
 
 Read `references/photometry-filters.md` for the full rules on resolving band names to SVO Filter
 Profile Service IDs before populating `PhotometryFilters.band`.
+
+## Checkpoint: Confirm ambiguous matches before writing output
+
+After applying all three matching layers, but **before writing any output files**, identify
+every **Low** or **Medium** confidence match. If there are any, compile them into a single
+table and present it to the user:
+
+> Before I write the mapping file, I want to confirm these ambiguous matches:
+>
+> | Column | Description | Units | Proposed DB Table.Field | Confidence | Reason for uncertainty |
+> |--------|-------------|-------|-------------------------|------------|------------------------|
+>
+> Please confirm each one, override with a different `Table.Field`, or say "ignore" to leave
+> it unmatched. I won't write the output files until you've reviewed these.
+
+**Wait for the user's response before writing any files.** Apply any overrides before
+producing the final output.
+
+For **High** confidence matches, no confirmation is needed — they can be written directly.
+
+If `artifacts/directions.md` already addresses a match, do not ask the user about it again —
+honor the direction. But if the directions file is silent on a case and your match is Low or
+Medium, you must stop and ask; do not fill in a silent default.
+
+> **Note:** This skill produces a **column mapping document**, not a `schema.yaml`.
+> `schema.yaml` is generated later by `astrodb-build-schema-generate`.
 
 ## Resolving Unmatched Columns
 
