@@ -213,7 +213,7 @@ Next steps:
 
 Before telling the user the database is created, verify every item in your section of the workflow checklist file and
 reproduce the evidence-annotated list here, per the **completion-checklist convention** in
-`references/astrodb-directions.md`. The felis-validation and pytest gates below are **not waivable** —
+`references/astrodb-build-directions.md`. The felis-validation and pytest gates below are **not waivable** —
 do not proceed past a failure.
 
 - [ ] You located the schema.yaml and confirmed `felis validate` passes on it — if it doesn't, you stopped rather than building from a broken schema.

@@ -12,9 +12,7 @@ metadata:
 Map columns from an astronomical data table to the AstroDB template database schema, so you know
 exactly which table and field each column belongs to before ingesting data.
 
-## Context Documents
-
-Before matching:
+## Directions Document
 
 1. Read `references/astrodb-directions.md` — it defines the workflow that you should use.
 2. Check whether `workflow.md` exists in the current working directory. If it does, read it
@@ -24,33 +22,7 @@ Before matching:
    edge cases) that should directly inform how you map columns. Honor any explicit direction
    over the default matching heuristics.
 
-Create the artifact folder before writing any files:
-
-```bash
-mkdir -p astrodb-build-artifacts
-```
-
-If this fails, stop and tell the user you cannot create the output directory.
-
-Then record this skill's checklist per the completion-checklist convention: add a
-`## astrodb-build-schema-match` section holding the items from `## Completion Checklist` (bottom of
-this file) to `astrodb-build-artifacts/checklists.md`.
-
-## Directions Document
-
-Before matching, look for a **directions document** — the user's notes on which columns go where, what
-to ignore, custom tables, and known edge cases. Work through these in order and stop at the first hit:
-
-1. **The user provided a path.** Read it, then copy it to `astrodb-build-artifacts/directions.md` so it
-   persists for later skills and later runs.
-2. **`astrodb-build-artifacts/directions.md` already exists** — from a prior run, or copied there by
-   `astrodb-build-parse-table`. Read it as-is.
-3. **Neither.** Proceed without one; it's optional.
-
-Where a directions document speaks to a column, honor it over the default matching heuristics in this
-skill. Column matching is guesswork built on naming conventions, and the user writes these notes exactly
-where those conventions mislead — a `J` column that's a magnitude in one survey and a coordinate in
-another. Their explicit call beats the heuristic every time.
+**All outputs from this skill must be written inside a folder named `astrodb-build-artifacts/` in the current working directory.** 
 
 ## Input
 
@@ -95,6 +67,32 @@ Read the **guiding principle at the top of `references/column-patterns.md` first
 
 Read `references/photometry-filters.md` for the full rules on resolving band names to SVO Filter
 Profile Service IDs before populating `PhotometryFilters.band`.
+
+## Checkpoint: Confirm ambiguous matches before writing output
+
+After applying all three matching layers, but **before writing any output files**, identify
+every **Low** or **Medium** confidence match. If there are any, compile them into a single
+table and present it to the user:
+
+> Before I write the mapping file, I want to confirm these ambiguous matches:
+>
+> | Column | Description | Units | Proposed DB Table.Field | Confidence | Reason for uncertainty |
+> |--------|-------------|-------|-------------------------|------------|------------------------|
+>
+> Please confirm each one, override with a different `Table.Field`, or say "ignore" to leave
+> it unmatched. I won't write the output files until you've reviewed these.
+
+**Wait for the user's response before writing any files.** Apply any overrides before
+producing the final output.
+
+For **High** confidence matches, no confirmation is needed — they can be written directly.
+
+If `artifacts/directions.md` already addresses a match, do not ask the user about it again —
+honor the direction. But if the directions file is silent on a case and your match is Low or
+Medium, you must stop and ask; do not fill in a silent default.
+
+> **Note:** This skill produces a **column mapping document**, not a `schema.yaml`.
+> `schema.yaml` is generated later by `astrodb-build-schema-generate`.
 
 ## Resolving Unmatched Columns
 
@@ -151,10 +149,13 @@ proposal as its starting point.
 
 Output the results as a markdown table, adding columns onto the output from `astrodb-build-parse-table` for the matched AstroDB Table, AstroDB Field, Confidence level, and Notes on the match.
 
-Write both output files inside `astrodb-build-artifacts/`, in a subdirectory named after the input file's base name with a `-schema-match` suffix. **Do not overwrite an existing directory** — if it already exists, append `-1`, `-2`, etc. until a free name is found. For example, if the input is `data/catalog.fits`, write:
+Write both output files directly inside `astrodb-build-artifacts/` — no subdirectory. Name them
+after the input file's base name with a `-schema-match` suffix. **Do not overwrite existing
+files** — if the file already exists, append `-1`, `-2`, etc. to the base name until a free name
+is found. For example, if the input is `data/catalog.fits`, write:
 
-- `astrodb-build-artifacts/catalog-schema-match/catalog-schema-match.md`
-- `astrodb-build-artifacts/catalog-schema-match/catalog-schema-match.html`
+- `astrodb-build-artifacts/catalog-schema-match.md`
+- `astrodb-build-artifacts/catalog-schema-match.html`
 
 Also write the results to an HTML file using the `Write` tool. Follow the full visual spec in `references/html-output.md` — read it now before writing the file.
 
@@ -182,10 +183,10 @@ Tell the user the exact file paths to both the markdown table and the HTML file 
 - **Proposed (new field)**: User chose to add a new field to an existing table — needs a schema update before ingestion
 - **Proposed (new table)**: User chose to add a new table — needs a schema update before ingestion
 
-## Final Step: Update `workflow.md`
+## Final Step: Update `build-workflow.md`
 
-Follow the convention in `references/astrodb-directions.md`. Append one new entry to
-`workflow.md` in the current working directory (create it with the standard header if it
+Follow the convention in `references/astrodb-build-directions.md`. Append one new entry to
+`astrodb-build-artifacts/build-workflow.md` (create it with the standard header if it
 doesn't exist yet). Record: any Low/Medium confidence matches and why that mapping was
 chosen, all Unmatched columns and how the user resolved each one, any new tables or fields
 proposed, and any decisions made without `astrodb-build-artifacts/directions.md` guidance.
@@ -194,7 +195,7 @@ proposed, and any decisions made without `astrodb-build-artifacts/directions.md`
 
 Before telling the user the mapping is done, verify every item in your section of the workflow checklist file and reproduce
 the evidence-annotated list here, per the **completion-checklist convention** in
-`references/astrodb-directions.md`.
+`references/astrodb-build-directions.md`.
 
 - [ ] If the input was a raw data file path rather than an already-parsed mapping table, you ran `astrodb-build-parse-table` on it first and worked from its output.
 - [ ] You read `references/schema.md` before mapping, and applied all three matching layers — name patterns, units (normalizing astropy's spaced forms like `km / s` to their compact equivalents), and description — plus the special-case rules in `references/column-patterns.md`. Any directions-document guidance was honored over the default heuristics.

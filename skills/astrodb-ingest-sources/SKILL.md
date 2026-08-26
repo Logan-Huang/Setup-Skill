@@ -234,11 +234,20 @@ After a successful dry run, ask the user:
 
 **Never set `SAVE_DB = True` automatically** — only on explicit user confirmation.
 
+## Final Step: Update `ingest-workflow.md`
+
+Follow the convention in `references/astrodb-ingest-directions.md`. **Prepend** one dated entry (most
+recent on top) to `astrodb-ingest-artifacts/ingest-workflow.md` (create it with the standard header if
+it doesn't exist yet). Record: which sources were ingested / skipped and why, how source names were
+resolved against SESAME/SIMBAD, any missing publications you offered to ingest, and whether the user
+explicitly confirmed before saving.
+
 ## Completion Checklist
 
-Before telling the user sources are ingested, verify every item in your section of the workflow checklist file and reproduce
-the evidence-annotated list here, per the **completion-checklist convention** in
-`references/astrodb-directions.md`.
+Before telling the user sources are ingested, verify every item below and reproduce the
+evidence-annotated list here, per the **completion-checklist convention** in
+`references/astrodb-ingest-directions.md` — verify and report each item in your final message; do
+**not** write the checklist out to a file.
 
 - [ ] `database.toml` was located (you asked the user rather than inventing one when it wasn't found).
 - [ ] Every discovery reference already exists in `Publications` — and for any that were missing, you offered to run `ingest_publication` as a sub-step rather than just telling the user to do it.

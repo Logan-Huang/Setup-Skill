@@ -127,7 +127,7 @@ to `astrodb-build-artifacts/schema-validation-report.md` with the Write tool —
 
 Before telling the user validation is done, verify every item in your section of the workflow checklist file and reproduce
 the evidence-annotated list here, per the **completion-checklist convention** in
-`references/astrodb-directions.md`.
+`references/astrodb-build-directions.md`.
 
 - [ ] You had the mapping table, the data file path, and the schema.yaml path — asking the user for any that were missing rather than guessing.
 - [ ] You parsed schema.yaml for each field's datatype, nullable flag, and length.

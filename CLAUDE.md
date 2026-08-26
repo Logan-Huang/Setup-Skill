@@ -31,7 +31,7 @@ When skills are added, removed, or significantly updated, remind the user to:
 
 Releases are created via the GitHub "Draft a new release" button. Use tags of the form `v1.0.0`.
 
-A GitHub Action (`.github/workflows/sync-version.yml`) bumps `pyproject.toml` on the target branch after a release is published so the branch stays in sync for future work. If you need the *release tag contents* to include the updated version, bump `pyproject.toml` before creating the release.
+A GitHub Action (`.github/workflows/sync-version.yml`) bumps `pyproject.toml` on the target branch after a release is published so the branch stays in sync for future work. **Do not bump `pyproject.toml` in a feature PR** — the action handles the version on release, so a manual bump only creates conflicts. Leave the version field alone unless you are specifically preparing the contents of a release tag before publishing it.
 
 ### Version Guidance
 
@@ -94,6 +94,7 @@ Skills are designed to chain in order:
 
 1. **`astrodb-ingest-publications`** — Add papers to the `Publications` table using `astrodb_utils.publications.ingest_publication`. Always resolves DOI/bibcode from NASA ADS before writing; never passes bare shortnames.
 2. **`astrodb-ingest-sources`** — Add rows to the `Sources` table using `astrodb_utils.sources.ingest_source`. Requires publications to already exist.
+3. **`astrodb-ingest-photometry`** — Add magnitudes to the `Photometry` table using `astrodb_utils.photometry.ingest_photometry`. Resolves each band to an SVO filter ID and sets up its `PhotometryFilters`/`Telescopes`/`Instruments` rows (via `ingest_photometry_filter`, which fetches SVO metadata) before any magnitude. Requires the source (`Sources`) and reference (`Publications`) to already exist.
 
 #### Website
 
@@ -102,7 +103,7 @@ Skills are designed to chain in order:
 ### Key Conventions Across Skills
 
 - **`SAVE_DB = False` by default** in all ingestion scripts. Skills always do a dry run first and require explicit user confirmation before setting `SAVE_DB = True`.
-- **Per-workflow artifact directories**: each workflow writes into its own directory in the project root — **`astrodb-build-artifacts/`** (parsed tables, generated schema YAML), **`astrodb-ingest-artifacts/`** (generated ingestion scripts), and **`astrodb-website-artifacts/`**. Each also holds that workflow's single shared `checklists.md` (see Completion checklist below).
+- **`astrodb-build-artifacts/`** holds build outputs written **flat** (no subdirectories): `<basename>-parsed-data-table.md/.html`, `<basename>-schema-match.md/.html`, `<name>-schema.yaml`, `astrodb-parse-result.json`, `validate_mapping.py`. **`astrodb-ingest-artifacts/`** holds generated ingestion scripts.
 - **`uv run`** is preferred over bare `python` to ensure the correct virtual environment.
 - **Database loading**: JSON-layout databases (astrodb-template-db) use `build_db_from_json(settings_file="database.toml")`; standalone `.sqlite` files use a direct connection.
 - **Shared conventions (`skills/astrodb-directions.md`)**: cross-skill conventions live in one file, symlinked into each skill's `references/astrodb-directions.md` so they resolve after install. It covers the `workflow.md` decision log, the artifact-folder convention, the `gotchas.md` problem log, and the completion-checklist convention. Each skill reads it at the start (its "Step 0: Read context documents").

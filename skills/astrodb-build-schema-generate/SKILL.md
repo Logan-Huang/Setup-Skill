@@ -182,7 +182,7 @@ Fix the errors, rewrite the file, and re-run validation. Repeat until the schema
 
 Before telling the user the schema is generated, verify every item in your section of the workflow checklist file and
 reproduce the evidence-annotated list here, per the **completion-checklist convention** in
-`references/astrodb-directions.md`.
+`references/astrodb-build-directions.md`.
 
 - [ ] The schema name was confirmed with the user (Step 0) and is a real dataset name — never `astrodb_template`/`template` — matching the `name:` and `@id:` written into the file.
 - [ ] Unmatched and (if a validation report was provided) problematic columns were audited and raised with the user — one question per category — or there were none. If no validation report was provided, you noted the schema was generated without null/type checks and suggested validating before ingesting.
