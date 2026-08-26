@@ -102,7 +102,7 @@ Skills are designed to chain in order:
 ### Key Conventions Across Skills
 
 - **`SAVE_DB = False` by default** in all ingestion scripts. Skills always do a dry run first and require explicit user confirmation before setting `SAVE_DB = True`.
-- **Per-workflow artifact directories**: each workflow writes into its own directory in the project root — **`astrodb-build-artifacts/`** (parsed tables, generated schema YAML), **`astrodb-ingest-artifacts/`** (generated ingestion scripts), and **`astrodb-website-artifacts/`**. Each also holds that workflow's single shared `checklists.md` (see Completion checklist below).
+- **`astrodb-build-artifacts/`** holds build outputs written **flat** (no subdirectories): `<basename>-parsed-data-table.md/.html`, `<basename>-schema-match.md/.html`, `<name>-schema.yaml`, `astrodb-parse-result.json`, `validate_mapping.py`. **`astrodb-ingest-artifacts/`** holds generated ingestion scripts.
 - **`uv run`** is preferred over bare `python` to ensure the correct virtual environment.
 - **Database loading**: JSON-layout databases (astrodb-template-db) use `build_db_from_json(settings_file="database.toml")`; standalone `.sqlite` files use a direct connection.
 - **Shared conventions (`skills/astrodb-directions.md`)**: cross-skill conventions live in one file, symlinked into each skill's `references/astrodb-directions.md` so they resolve after install. It covers the `workflow.md` decision log, the artifact-folder convention, and the completion-checklist convention. Each skill reads it at the start (its "Step 0: Read context documents").

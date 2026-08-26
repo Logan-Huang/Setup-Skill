@@ -19,15 +19,7 @@ If it does, read it now — it captures dataset-specific decisions (columns to s
 to handle edge cases, schema choices) that should guide your interpretation throughout this skill.
 If it doesn't exist, proceed without it.
 
-**All outputs from this skill must be written inside a folder named `astrodb-build-artifacts/` in the current working directory.** Create this folder before writing any files.
-
-Run this before anything else:
-
-```bash
-mkdir -p astrodb-build-artifacts
-```
-
-If this fails, stop and tell the user you cannot create the output directory.
+**All outputs from this skill must be written inside the `astrodb-build-artifacts/` in the current working directory.** 
 
 ### Step 1: Make sure Python is installed and the necessary libraries are available
 
@@ -187,9 +179,12 @@ If there are 10 or more columns still missing descriptions or units, output the 
 
 ### Step 5: Output the results
 
-Create a new output directory inside `astrodb-build-artifacts/`, named after the input file's base name with a `-parsed-data-table` suffix. **Do not overwrite an existing directory** — if the directory already exists, append `-1`, `-2`, etc. until a free name is found. For example, if the input is `data/catalog.fits`, create `astrodb-build-artifacts/catalog-parsed-data-table/` and save:
-- `astrodb-build-artifacts/catalog-parsed-data-table/catalog-parsed-data-table.md`
-- `astrodb-build-artifacts/catalog-parsed-data-table/catalog-parsed-data-table.html`
+Write both output files directly inside `astrodb-build-artifacts/` — no subdirectory. Name them
+after the input file's base name with a `-parsed-data-table` suffix. **Do not overwrite existing
+files** — if the file already exists, append `-1`, `-2`, etc. to the base name until a free name
+is found. For example, if the input is `data/catalog.fits`, write:
+- `astrodb-build-artifacts/catalog-parsed-data-table.md`
+- `astrodb-build-artifacts/catalog-parsed-data-table.html`
 
 Each file should begin with a metadata block:
 
@@ -224,8 +219,8 @@ import json
 with open("astrodb-build-artifacts/astrodb-parse-result.json") as f:
     sidecar = json.load(f)
 
-sidecar["output_md"] = "<path to .md file>"
-sidecar["output_html"] = "<path to .html file>"
+sidecar["output_md"] = "astrodb-build-artifacts/<basename>-parsed-data-table.md"
+sidecar["output_html"] = "astrodb-build-artifacts/<basename>-parsed-data-table.html"
 
 with open("astrodb-build-artifacts/astrodb-parse-result.json", "w") as f:
     json.dump(sidecar, f)
