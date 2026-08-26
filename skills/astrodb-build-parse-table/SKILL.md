@@ -252,10 +252,10 @@ was any ambiguity, the user may want to know or change it.
 > It is generated later by `astrodb-build-schema-generate`.
 Ask the user to inspect the results table and check if everything looks good, or if they want to make any edits to the descriptions, units, or types. If they want to make edits, allow them to specify which column(s) and what changes to make, then update the markdown and HTML files accordingly.
 
-## Final Step: Update `workflow.md`
+## Final Step: Update `build-workflow.md`
 
-Follow the convention in `references/astrodb-directions.md`. Append one new entry to
-`workflow.md` in the current working directory (create it with the standard header if it
+Follow the convention in `references/astrodb-build-directions.md`. Append one new entry to
+`astrodb-build-artifacts/build-workflow.md` (create it with the standard header if it
 doesn't exist yet). Record: which file was parsed, which reader was used and why, any
 column descriptions or units that were inferred, what the user confirmed during gap-filling,
 and any columns still missing metadata.
@@ -264,7 +264,7 @@ and any columns still missing metadata.
 
 Before telling the user the table is parsed, verify every item in your section of the workflow checklist file and reproduce
 the evidence-annotated list here, per the **completion-checklist convention** in
-`references/astrodb-directions.md`. Don't claim a value you didn't actually extract.
+`references/astrodb-build-directions.md`. Don't claim a value you didn't actually extract.
 
 - [ ] Descriptions were extracted using the format-specific methods in `references/format-specific-metadata.md` — not taken from what Step 2 printed (which is only reliable for ECSV and CDS/MRT).
 - [ ] For a `.txt`/`.dat` input, you checked for the `Byte-by-byte Description of file` MRT signature before treating it as plain CSV.
